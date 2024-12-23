@@ -1,0 +1,14 @@
+services:
+  backend:
+    build: ./
+    container_name: fastApiBackend
+    restart: always
+    command: ./commands/api.sh
+
+    ports:
+      - ${PORT}:${API_PORT}
+    volumes:
+      - ./src:/project
+      - ./commands:/project/commands
+    env_file:
+      - .env

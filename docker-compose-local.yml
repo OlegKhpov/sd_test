@@ -1,0 +1,42 @@
+services:
+  backend:
+    build: ./
+    container_name: fastApiBackendLocal
+    restart: always
+    command: ./commands/api.sh
+    environment:
+      - SERVICES_URL=https://weatherLocalStack:4566
+    ports:
+      - ${PORT}:${API_PORT}
+    volumes:
+      - ./src:/project
+      - ./commands:/project/commands
+    env_file:
+      - .env
+    depends_on:
+      localstack:
+        condition: service_healthy
+
+  localstack:
+    container_name: weatherLocalstack
+    image: localstack/localstack:latest
+    expose:
+      - 4566
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=s3,dynamodb
+      - S3_SKIP_SIGNATURE_VALIDATION
+      - DYNAMODB_SHARE_DB=1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker/.sock
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566"]
+      retries: 10
+      timeout: 5s
+      interval: 10s
+      start_period: 5s
+
+volumes:
+  static:
